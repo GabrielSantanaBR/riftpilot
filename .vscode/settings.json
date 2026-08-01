@@ -10,7 +10,7 @@
   "files.trimFinalNewlines": true,
   "files.trimTrailingWhitespace": true,
   "python.analysis.typeCheckingMode": "basic",
-  "python.defaultInterpreterPath": "${workspaceFolder}\\.venv\\Scripts\\python.exe",
+  "python.defaultInterpreterPath": "${workspaceFolder}\\services\\analytics\\.venv\\Scripts\\python.exe",
   "ruff.nativeServer": "on",
   "[javascript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
