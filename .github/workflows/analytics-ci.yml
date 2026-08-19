@@ -1,0 +1,40 @@
+name: Analytics CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "services/analytics/**"
+      - ".github/workflows/analytics-ci.yml"
+  pull_request:
+    paths:
+      - "services/analytics/**"
+      - ".github/workflows/analytics-ci.yml"
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/analytics
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
+      - name: Set up Python
+        run: uv python install 3.13
+
+      - name: Install dependencies
+        run: uv sync --group dev --locked
+
+      - name: Lint
+        run: uv run ruff check .
+
+      - name: Test
+        run: uv run pytest
