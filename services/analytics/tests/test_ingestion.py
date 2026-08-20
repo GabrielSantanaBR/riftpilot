@@ -4,13 +4,48 @@ from riftpilot_analytics.ingestion.live_client import normalize_all_game_data
 
 def test_normalize_live_client_payload() -> None:
     payload = {
-        "activePlayer": {"riotId": "Player#BR1", "currentGold": 900, "championStats": {"currentHealth": 800, "maxHealth": 1000, "armor": 50, "magicResist": 40}},
+        "activePlayer": {
+            "riotId": "Player#BR1",
+            "currentGold": 900,
+            "championStats": {
+                "currentHealth": 800,
+                "maxHealth": 1000,
+                "armor": 50,
+                "magicResist": 40,
+            },
+        },
         "allPlayers": [
-            {"riotId": "Player#BR1", "championName": "Ahri", "team": "ORDER", "level": 8, "scores": {"kills": 2, "deaths": 1, "assists": 3, "creepScore": 80}, "items": [{"itemID": 1001, "displayName": "Boots", "count": 1, "price": 300}]},
-            {"riotId": "Enemy#BR1", "championName": "Annie", "team": "CHAOS", "level": 8, "scores": {}, "items": []},
+            {
+                "riotId": "Player#BR1",
+                "summonerName": "Player",
+                "championName": "Ahri",
+                "team": "ORDER",
+                "level": 8,
+                "scores": {"kills": 2, "deaths": 1, "assists": 3, "creepScore": 80},
+                "items": [{"itemID": 1001, "displayName": "Boots", "count": 1, "price": 300}],
+            },
+            {
+                "riotId": "Enemy#BR1",
+                "championName": "Annie",
+                "team": "CHAOS",
+                "level": 8,
+                "scores": {},
+                "items": [],
+            },
         ],
         "gameData": {"gameTime": 600, "gameMode": "CLASSIC", "mapName": "Map11"},
-        "events": {"Events": [{"EventID": 4, "EventName": "ChampionKill", "EventTime": 590, "KillerName": "Enemy#BR1", "VictimName": "Player#BR1", "Assistants": []}]},
+        "events": {
+            "Events": [
+                {
+                    "EventID": 4,
+                    "EventName": "ChampionKill",
+                    "EventTime": 590,
+                    "KillerName": "Enemy#BR1",
+                    "VictimName": "Player",
+                    "Assistants": [],
+                }
+            ]
+        },
     }
     snapshot = normalize_all_game_data(payload)
     assert snapshot.source == SnapshotSource.LIVE_CLIENT
