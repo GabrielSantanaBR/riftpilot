@@ -2,7 +2,11 @@
 
 from __future__ import annotations
 
-from riftpilot_analytics.domain.models import DefenseScenario, DefenseSimulationRequest, DefenseSimulationResult
+from riftpilot_analytics.domain.models import (
+    DefenseScenario,
+    DefenseSimulationRequest,
+    DefenseSimulationResult,
+)
 
 
 def _damage_multiplier(resistance: float) -> float:
