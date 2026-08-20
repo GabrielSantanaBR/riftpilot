@@ -1,41 +1,20 @@
 # RiftPilot Analytics
 
-Local Python service responsible for data collection, normalization, decision rules, and future statistical models.
+Local FastAPI service that converts Riot Live Client Data API snapshots into a stable domain model, extracts contextual signals, emits explainable recommendations, runs defensive counterfactual simulations, and stores optional local history in SQLite.
 
-## Current capability
+## Run
 
-- Starts a FastAPI application.
-- Exposes a health endpoint.
-- Validates its response with a Pydantic model.
-- Includes automated tests and linting.
-
-## Install dependencies
-
-```powershell
+```bash
 uv sync --group dev
-```
-
-## Run quality checks
-
-```powershell
-uv run ruff check .
-uv run pytest
-```
-
-## Start the service
-
-```powershell
 uv run uvicorn riftpilot_analytics.main:app --reload
 ```
 
-The local API will be available at:
+Open `http://127.0.0.1:8000/docs` for the interactive API.
 
-```text
-http://127.0.0.1:8000
+## Demo without League
+
+```bash
+curl -X POST http://127.0.0.1:8000/v1/demo/analyze
 ```
 
-Interactive API documentation will be available at:
-
-```text
-http://127.0.0.1:8000/docs
-```
+No Riot API key is required for the Live Client Data API because it is served locally by an active game client. RiftPilot does not read process memory, inject code, automate gameplay, or attempt to expose hidden information.
