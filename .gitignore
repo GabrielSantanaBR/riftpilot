@@ -2,30 +2,21 @@
 __pycache__/
 *.py[cod]
 .pytest_cache/
-.ruff_cache/
 .coverage
-coverage.xml
 htmlcov/
 .venv/
-venv/
 
-# Node
+# Local RiftPilot data
+.riftpilot/
+*.db
+*.sqlite3
+
+# Node / Electron
 node_modules/
 dist/
-build/
-.next/
+*.log
 
-# Environment and secrets
-.env
-.env.*
-!.env.example
-
-# IDE / OS
-.idea/
+# Editors / OS
+.vscode/*.log
 .DS_Store
 Thumbs.db
-
-# Logs and temp
-*.log
-*.tmp
-*.temp
