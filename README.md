@@ -1,85 +1,93 @@
 # RiftPilot
 
-RiftPilot é um projeto experimental de **assistente analítico para League of Legends**, pensado como aplicativo desktop com foco em análise de contexto, recomendações explicáveis e apoio à tomada de decisão usando apenas informações permitidas e disponíveis ao próprio jogador.
+**RiftPilot is a local-first, explainable match-intelligence desktop application for League of Legends.** It converts data that the player is already allowed to see into an explicit decision trace: what matters now, how confident the system is, which signals caused the recommendation, and what would change under a counterfactual scenario.
 
-> Status: em desenvolvimento. O repositório contém a fundação técnica do serviço de analytics; as funcionalidades de recomendação em tempo real ainda não estão concluídas.
+The project is intentionally designed as a serious **Data + Backend + Desktop Product** portfolio piece rather than an overlay that pretends to be an opaque "AI coach".
 
-## Objetivo
+## Why this project exists
 
-O projeto explora como dados, regras de decisão e modelos estatísticos podem ser usados para transformar o estado de uma partida em recomendações úteis, como:
+Most game-assistant demos stop at static build lists. RiftPilot focuses on a harder engineering problem: **turning noisy live context into safe, explainable, testable decisions without reading hidden information or automating gameplay.**
 
-- interpretação de matchup;
-- sugestões de build condicionais ao contexto;
-- leitura de objetivos e janelas de rotação;
-- análise pós-partida;
-- explicação do motivo de cada recomendação.
+The system demonstrates:
 
-RiftPilot não pretende obter informações ocultas da partida ou automatizar ações dentro do jogo.
+- real-time-ish local data ingestion;
+- domain normalization over an external API shape;
+- feature engineering and deterministic decision scoring;
+- uncertainty-aware recommendations;
+- counterfactual simulation;
+- SQLite event/history persistence;
+- FastAPI/OpenAPI design;
+- Electron + React + TypeScript desktop UX;
+- automated backend tests and CI;
+- compliance-conscious product architecture.
 
-## Princípios do produto
-
-1. **Fair play primeiro** — usar somente dados disponíveis ao jogador e fontes permitidas.
-2. **Recomendações explicáveis** — cada sugestão deve ter contexto e justificativa.
-3. **Analytics antes de IA** — começar por coleta, normalização, regras e métricas; modelos mais complexos entram quando houver dados e validação suficientes.
-4. **Local-first quando possível** — o serviço de análise roda localmente e pode ser consumido pelo futuro aplicativo desktop.
-5. **Arquitetura modular** — separar ingestão, domínio, regras, modelos e interface.
-
-## Estado atual
-
-A primeira peça implementada é o serviço `services/analytics`:
-
-- Python 3.13;
-- FastAPI;
-- Pydantic;
-- `uv` para dependências;
-- Ruff para lint;
-- Pytest + cobertura mínima de 90%;
-- endpoint de health check;
-- estrutura pronta para receber coleta, normalização e regras de decisão.
-
-## Arquitetura planejada
+## Product flow
 
 ```text
-League Client / fontes permitidas
-            │
-            ▼
-     Data Collection
-            │
-            ▼
-      Normalization
-            │
-            ▼
-   Match State / Domain
-       │           │
-       ▼           ▼
- Decision Rules   Models
-       │           │
-       └─────┬─────┘
-             ▼
- Recommendation Engine
-             │
-             ▼
-       Desktop Client
+League Live Client Data API                 Deterministic Demo Fixture
+       (localhost:2999)                              │
+               │                                     │
+               └─────────────┬───────────────────────┘
+                             ▼
+                     Snapshot Normalizer
+                             ▼
+                      Domain Match State
+                             ▼
+                     Feature Engineering
+                             ▼
+             Explainable Decision Engine v0.4
+                  │                    │
+                  ▼                    ▼
+        Recommendations         Counterfactual Lab
+                  │                    │
+                  └──────────┬─────────┘
+                             ▼
+                 FastAPI + local SQLite history
+                             ▼
+                Electron / React desktop client
 ```
 
-A prioridade é construir primeiro uma representação confiável do estado da partida. A camada de recomendação só deve consumir dados normalizados e testáveis.
+## What makes RiftPilot different
 
-## Estrutura
+### Decision Trace
+Every recommendation contains a priority, confidence score, plain-language reasons, structured evidence, and a counterfactual describing which state change would make the advice disappear or flip.
+
+### Uncertainty-aware confidence
+Confidence is reduced when useful fields are unavailable. A missing live field does not silently become fake certainty.
+
+### Replayable Demo Mode
+A reviewer can inspect the full flow without owning League or starting a match. The same engine analyzes a deterministic fixture exposed at `/v1/demo/*`.
+
+### Counterfactual Defense Lab
+The `/v1/simulate/defense` endpoint compares baseline and upgraded defensive stats against a supplied physical/magic/true damage packet. It uses League-style resistance math and reports whether the stat change flips a lethal scenario.
+
+### Local-first history
+Snapshots and analysis results can be stored in SQLite on the user's machine. The default design does not require uploading live match state to a remote server.
+
+## Repository structure
 
 ```text
 riftpilot/
-├── docs/
-│   ├── decisions/          # decisões de arquitetura
-│   ├── development-setup.md
-│   └── roadmap.md
+├── apps/
+│   └── desktop/                 # Electron + React + TypeScript client
 ├── services/
-│   └── analytics/          # serviço Python/FastAPI
+│   └── analytics/               # FastAPI analytics service
+│       ├── src/riftpilot_analytics/
+│       │   ├── api/             # HTTP routes and dependencies
+│       │   ├── core/            # features, engine, simulation
+│       │   ├── domain/          # stable Pydantic domain models
+│       │   ├── fixtures/        # deterministic demo match
+│       │   ├── ingestion/       # Live Client Data API adapter
+│       │   └── storage/         # SQLite repository
+│       └── tests/
+├── docs/                        # architecture, demo, compliance
 ├── scripts/
-├── PROJECT_CONVENTIONS.md
-└── README.md
+└── .github/workflows/
 ```
 
-## Executando o serviço de analytics
+## Run the analytics service
+
+Requirements: Python 3.13 and `uv`.
 
 ```bash
 cd services/analytics
@@ -89,40 +97,67 @@ uv run pytest
 uv run uvicorn riftpilot_analytics.main:app --reload
 ```
 
-API local:
+OpenAPI: `http://127.0.0.1:8000/docs`
 
-```text
-http://127.0.0.1:8000
+### Fast demo
+
+```bash
+curl -X POST http://127.0.0.1:8000/v1/demo/analyze
 ```
 
-Documentação OpenAPI:
+## Run the desktop client
 
-```text
-http://127.0.0.1:8000/docs
+Requirements: Node.js 22+.
+
+```bash
+cd apps/desktop
+npm install
+npm run desktop:dev
 ```
 
-## Roadmap resumido
+Keep the analytics service running on `127.0.0.1:8000`.
 
-- [x] Estrutura inicial do monorepo
-- [x] Serviço Python de analytics
-- [x] Health check, testes, lint e cobertura
-- [ ] Definir modelo de domínio da partida
-- [ ] Camada de ingestão de dados permitidos
-- [ ] Normalização de campeões, itens e eventos
-- [ ] Motor inicial de regras explicáveis
-- [ ] Matchup scoring
-- [ ] Recomendações condicionais de build
-- [ ] Análise de objetivos e rotações
-- [ ] Persistência local de partidas
-- [ ] Cliente desktop
-- [ ] Modelos estatísticos/ML após validação da base
+## Main API endpoints
 
-Veja [`docs/roadmap.md`](docs/roadmap.md) para o plano detalhado.
+| Endpoint | Purpose |
+| --- | --- |
+| `GET /health` | Service health/version |
+| `GET /v1/live/status` | Checks whether the local game endpoint is available |
+| `GET /v1/live/snapshot` | Normalized live match state |
+| `POST /v1/live/analyze` | Analyze current live state and optionally persist it |
+| `GET /v1/demo/snapshot` | Deterministic reviewer fixture |
+| `POST /v1/demo/analyze` | Full analysis without League running |
+| `POST /v1/analyze` | Analyze any valid normalized snapshot |
+| `POST /v1/simulate/defense` | Counterfactual survivability comparison |
+| `GET /v1/history` | Local analysis history |
+| `GET /v1/history/{id}` | Full stored snapshot + decision trace |
 
-## O que este projeto demonstra
+## Engineering boundaries
 
-RiftPilot é principalmente um projeto de **Dados + Backend + Produto**. Ele foi criado para praticar modelagem de domínio, APIs locais, pipelines de dados, testes, estatística aplicada e, futuramente, machine learning em um problema com decisões em tempo real.
+RiftPilot is deliberately read-only. It does **not**:
 
-## Aviso
+- read League process memory;
+- inject code or modify the game/client;
+- automate inputs or gameplay;
+- attempt to recover fog-of-war or other hidden information;
+- claim a heuristic score is a trained ML model.
 
-League of Legends e Riot Games são marcas de seus respectivos proprietários. RiftPilot é um projeto independente de estudo e portfólio e não possui afiliação oficial com a Riot Games.
+The current decision engine is deterministic and versioned. That choice makes it testable and provides a clean baseline for future statistical models. A future ML layer should only be promoted after a real labeled dataset and out-of-sample evaluation exist.
+
+## Portfolio narrative
+
+A useful way to present RiftPilot in an interview:
+
+> I built a local decision-support system around a live external API. The hard part was not calling the endpoint; it was defining a stable domain model, handling partial data, creating explainable features, versioning decision logic, preserving privacy, and building a demo that anyone can reproduce without the original game environment.
+
+See `docs/architecture.md` for deeper technical rationale and `docs/compliance.md` for Riot-specific product constraints.
+
+## Status
+
+**v0.4 portfolio release:** analytics engine, live normalization, demo mode, decision trace, counterfactual simulator, SQLite history, API, desktop dashboard, tests, and CI are implemented.
+
+Future work is intentionally evidence-driven: patch-aware static-data enrichment, labeled outcome collection, calibration metrics, and only then statistical/ML models.
+
+## Legal
+
+RiftPilot is an independent portfolio project and is not endorsed by Riot Games. League of Legends and Riot Games are trademarks or registered trademarks of Riot Games, Inc. See `docs/compliance.md` before distributing the application to players.
