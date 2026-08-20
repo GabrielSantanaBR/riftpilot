@@ -14,12 +14,15 @@ from riftpilot_analytics.api.routes.live import router as live_router
 def create_application() -> FastAPI:
     application = FastAPI(
         title="RiftPilot Analytics",
-        description="Local-first League of Legends context analysis with explainable recommendations and counterfactual simulation.",
+        description=(
+            "Local-first League of Legends context analysis with explainable recommendations "
+            "and counterfactual simulation."
+        ),
         version=__version__,
     )
     application.add_middleware(
         CORSMiddleware,
-        allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+        allow_origins=["http://localhost:5173", "http://127.0.0.1:5173", "null"],
         allow_credentials=False,
         allow_methods=["GET", "POST"],
         allow_headers=["*"],
