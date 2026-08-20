@@ -14,8 +14,12 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 export const api = {
   health: () => request<{ status: string; version: string }>("/health"),
   liveStatus: () => request<{ available: boolean }>("/v1/live/status"),
-  analyzeLive: () => request<AnalysisResult>("/v1/live/analyze", { method: "POST" }),
-  analyzeDemo: () => request<AnalysisResult>("/v1/demo/analyze", { method: "POST" }),
+  analyzeSnapshot: (snapshot: GameSnapshot, persist = false) =>
+    request<AnalysisResult>(`/v1/analyze?persist=${persist}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(snapshot),
+    }),
   demoSnapshot: () => request<GameSnapshot>("/v1/demo/snapshot"),
   liveSnapshot: () => request<GameSnapshot>("/v1/live/snapshot"),
 };
