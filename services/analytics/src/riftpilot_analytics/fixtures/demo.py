@@ -1,6 +1,15 @@
 """Deterministic demo match used for portfolio reviews and UI development."""
 
-from riftpilot_analytics.domain.models import ChampionStats, GameEvent, GameSnapshot, ItemState, PlayerState, Score, SnapshotSource, Team
+from riftpilot_analytics.domain.models import (
+    ChampionStats,
+    GameEvent,
+    GameSnapshot,
+    ItemState,
+    PlayerState,
+    Score,
+    SnapshotSource,
+    Team,
+)
 
 
 def demo_snapshot() -> GameSnapshot:
