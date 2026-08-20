@@ -59,9 +59,10 @@ export default function App() {
     setBusy(true);
     setError(null);
     try {
-      const [nextAnalysis, nextSnapshot] = mode === "live"
-        ? await Promise.all([api.analyzeLive(), api.liveSnapshot()])
-        : await Promise.all([api.analyzeDemo(), api.demoSnapshot()]);
+      const nextSnapshot = mode === "live"
+        ? await api.liveSnapshot()
+        : await api.demoSnapshot();
+      const nextAnalysis = await api.analyzeSnapshot(nextSnapshot, mode === "live");
       setAnalysis(nextAnalysis);
       setSnapshot(nextSnapshot);
     } catch (nextError) {
