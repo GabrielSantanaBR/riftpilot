@@ -11,17 +11,17 @@
     "desktop:dev": "concurrently -k \"vite\" \"wait-on http://127.0.0.1:5173 && electron .\""
   },
   "dependencies": {
-    "react": "latest",
-    "react-dom": "latest"
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
   },
   "devDependencies": {
-    "@types/react": "latest",
-    "@types/react-dom": "latest",
-    "@vitejs/plugin-react": "latest",
-    "concurrently": "latest",
-    "electron": "latest",
-    "typescript": "latest",
-    "vite": "latest",
-    "wait-on": "latest"
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.4",
+    "@vitejs/plugin-react": "6.0.5",
+    "concurrently": "10.0.4",
+    "electron": "43.4.0",
+    "typescript": "7.0.2",
+    "vite": "8.2.1",
+    "wait-on": "9.1.0"
   }
 }
