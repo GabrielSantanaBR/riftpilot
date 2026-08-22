@@ -6,12 +6,12 @@ readme = "README.md"
 requires-python = ">=3.13,<3.14"
 dependencies = [
   "fastapi",
+  "httpx",
   "uvicorn[standard]",
 ]
 
 [dependency-groups]
 dev = [
-  "httpx",
   "pytest",
   "pytest-cov",
   "ruff",

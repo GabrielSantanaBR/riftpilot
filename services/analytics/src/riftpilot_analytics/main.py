@@ -4,6 +4,7 @@ from fastapi import FastAPI
 
 from riftpilot_analytics import __version__
 from riftpilot_analytics.api.routes.health import router as health_router
+from riftpilot_analytics.api.routes.live_game import router as live_game_router
 
 
 def create_application() -> FastAPI:
@@ -15,6 +16,7 @@ def create_application() -> FastAPI:
         version=__version__,
     )
     application.include_router(health_router)
+    application.include_router(live_game_router)
 
     return application
 
